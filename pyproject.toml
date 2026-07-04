@@ -1,0 +1,20 @@
+[project]
+name = "jobindex-scraper"
+version = "0.1.0"
+description = "Scrape jobindex.dk, classify with LLM, and send Telegram notifications"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28",
+    "beautifulsoup4>=4.12",
+    "lxml>=5",
+    "supabase>=2",
+    "python-dotenv>=1",
+]
+
+[project.scripts]
+jobindex-scrape = "jobindex_scraper.scrape_cli:main"
+jobindex-classify = "jobindex_scraper.classify_cli:main"
+jobindex-message = "jobindex_scraper.message_cli:main"
+
+[tool.uv]
+package = true

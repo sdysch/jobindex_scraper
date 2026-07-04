@@ -1,0 +1,102 @@
+from datetime import datetime, timezone
+from typing import Optional
+
+from supabase import create_client, Client
+
+from jobindex_scraper.scraper import JobPosting
+
+
+class Database:
+    def __init__(self, url: str, key: str) -> None:
+        self.client: Client = create_client(url, key)
+
+    def job_exists(self, external_id: str) -> bool:
+        result = (
+            self.client.table('jobs')
+            .select('id')
+            .eq('external_id', external_id)
+            .limit(1)
+            .execute()
+        )
+        return len(result.data) > 0
+
+    def insert_job(self, job: JobPosting, search_url: str) -> dict:
+        now = datetime.now(timezone.utc).isoformat()
+        data = {
+            'external_id': job.external_id,
+            'url': job.url,
+            'title': job.title,
+            'company': job.company,
+            'location': job.location,
+            'description': job.description,
+            'search_url': search_url,
+            'posted_at': job.posted_at,
+            'updated_at': now,
+        }
+
+        result = (
+            self.client.table('jobs')
+            .upsert(data, on_conflict='external_id')
+            .execute()
+        )
+        return result.data[0] if result.data else {}
+
+    def get_unclassified_jobs(self) -> list[dict]:
+        match_rows = (
+            self.client.table('matches')
+            .select('job_id')
+            .execute()
+        )
+        classified_ids = {r['job_id'] for r in match_rows.data}
+
+        all_rows = (
+            self.client.table('jobs')
+            .select('*')
+            .order('scraped_at', desc=True)
+            .execute()
+        )
+
+        if classified_ids:
+            return [j for j in all_rows.data if j['id'] not in classified_ids]
+        return all_rows.data
+
+    def insert_match(
+        self,
+        job_id: int,
+        language: str,
+        is_match: bool,
+        reason: str,
+        criteria: str,
+    ) -> dict:
+        data = {
+            'job_id': job_id,
+            'language': language,
+            'is_match': is_match,
+            'match_reason': reason,
+            'criteria_used': criteria,
+        }
+
+        result = (
+            self.client.table('matches')
+            .insert(data)
+            .execute()
+        )
+        return result.data[0] if result.data else {}
+
+    def get_unnotified_matches(self) -> list[dict]:
+        result = (
+            self.client.table('matches')
+            .select('*, jobs(*)')
+            .eq('is_match', True)
+            .eq('notified', False)
+            .order('classified_at', desc=True)
+            .execute()
+        )
+        return result.data
+
+    def mark_matches_notified(self, match_ids: list[int]) -> None:
+        now = datetime.now(timezone.utc).isoformat()
+        self.client.table('matches') \
+            .update({'notified': True, 'notified_at': now}) \
+            .in_('id', match_ids) \
+            .execute()
