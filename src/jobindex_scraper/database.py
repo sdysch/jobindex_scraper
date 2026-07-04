@@ -47,18 +47,13 @@ class Database:
             .select('job_id')
             .execute()
         )
-        classified_ids = {r['job_id'] for r in match_rows.data}
+        classified_ids = [r['job_id'] for r in match_rows.data]
 
-        all_rows = (
-            self.client.table('jobs')
-            .select('*')
-            .order('scraped_at', desc=True)
-            .execute()
-        )
-
+        query = self.client.table('jobs').select('*').order('scraped_at', desc=True)
         if classified_ids:
-            return [j for j in all_rows.data if j['id'] not in classified_ids]
-        return all_rows.data
+            query = query.not_.in_('id', classified_ids)
+        result = query.execute()
+        return result.data
 
     def insert_match(
         self,
