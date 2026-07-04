@@ -5,6 +5,10 @@ on:
     - cron: '5,35 * * * *'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  models: read
+
 jobs:
   classify:
     runs-on: ubuntu-latest
