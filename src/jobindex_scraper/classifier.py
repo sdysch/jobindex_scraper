@@ -1,5 +1,6 @@
 import json
 import re
+import time
 from dataclasses import dataclass
 from enum import Enum
 
@@ -49,27 +50,37 @@ class LLMClassifier:
         self.base_url = config.base_url.rstrip('/')
 
     def _call(self, system_prompt: str, user_prompt: str) -> dict:
-        response = httpx.post(
-            f'{self.base_url}/chat/completions',
-            headers={
-                'Authorization': f'Bearer {self.api_key}',
-                'Content-Type': 'application/json',
-            },
-            json={
-                'model': self.model,
-                'messages': [
-                    {'role': 'system', 'content': system_prompt},
-                    {'role': 'user', 'content': user_prompt},
-                ],
-                'response_format': {'type': 'json_object'},
-                'temperature': 0.1,
-                'max_tokens': 300,
-            },
-            timeout=30.0,
-        )
+        for attempt in range(5):
+            response = httpx.post(
+                f'{self.base_url}/chat/completions',
+                headers={
+                    'Authorization': f'Bearer {self.api_key}',
+                    'Content-Type': 'application/json',
+                },
+                json={
+                    'model': self.model,
+                    'messages': [
+                        {'role': 'system', 'content': system_prompt},
+                        {'role': 'user', 'content': user_prompt},
+                    ],
+                    'response_format': {'type': 'json_object'},
+                    'temperature': 0.1,
+                    'max_tokens': 300,
+                },
+                timeout=30.0,
+            )
+
+            if response.status_code == 429:
+                wait = 2 ** attempt
+                time.sleep(wait)
+                continue
+
+            response.raise_for_status()
+            content = response.json()['choices'][0]['message']['content'] or ''
+            return _parse_json(content)
+
         response.raise_for_status()
-        content = response.json()['choices'][0]['message']['content'] or ''
-        return _parse_json(content)
+        return {}
 
     def classify_language(self, job: JobPosting) -> Language:
         result = self._call(
