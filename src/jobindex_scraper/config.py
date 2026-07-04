@@ -53,8 +53,9 @@ class Config:
     def _load_json_env(key: str, env_path: Path) -> list[str]:
         raw = os.getenv(key, '')
         if raw:
+            cleaned = re.sub(r',\s*([}\]])', r'\1', raw)
             try:
-                return json.loads(raw)
+                return json.loads(cleaned)
             except json.JSONDecodeError:
                 pass
 
