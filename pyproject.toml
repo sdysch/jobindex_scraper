@@ -9,6 +9,7 @@ dependencies = [
     "lxml>=5",
     "supabase>=2",
     "python-dotenv>=1",
+    "pydantic>=2",
 ]
 
 [project.scripts]

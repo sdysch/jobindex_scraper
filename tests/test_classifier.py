@@ -1,4 +1,4 @@
-from jobindex_scraper.classifier import Language, MatchResult, _parse_json
+from jobindex_scraper.classifier import _parse_json
 
 
 class TestParseJson:

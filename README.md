@@ -26,7 +26,7 @@ Scrape job listings from [Jobindex.dk](https://www.jobindex.dk) in three phases:
 - Python 3.12+
 - [uv](https://docs.astral.sh/uv/)
 - A Supabase project
-- A [GitHub token](https://github.com/settings/tokens) for GitHub Models
+- A [GitHub token](https://github.com/settings/tokens) for GitHub Models (auto assigned in each GHA runner)
 - A Telegram bot token and chat ID
 
 ## Setup
@@ -80,6 +80,8 @@ manual: jobindex-message  →  when you want a digest
 1. **Scrape** fetches each search URL, parses the embedded `Stash` JSON from the Jobindex SPA, and upserts job postings into the `jobs` table. Jobs are deduplicated by `external_id`.
 2. **Classify** queries jobs without a corresponding `matches` row, sends each to an LLM (GitHub Models / OpenAI-compatible) for language classification and criteria matching, then inserts results into `matches`.
 3. **Message** reads `matches` with `notified = false` and `is_match = true`, sends a formatted Telegram message, then marks them as notified.
+
+The classifier uses [pydantic](https://docs.pydantic.dev/) to validate LLM JSON responses against expected schemas.
 
 ## Project structure
 

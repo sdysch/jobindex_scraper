@@ -1,10 +1,11 @@
 import json
 import re
 import time
-from dataclasses import dataclass
 from enum import Enum
+from typing import Literal
 
 import httpx
+from pydantic import BaseModel, ValidationError
 
 from jobindex_scraper.config import LLMConfig
 from jobindex_scraper.scraper import JobPosting
@@ -16,10 +17,13 @@ class Language(Enum):
     UNKNOWN = 'unknown'
 
 
-@dataclass
-class MatchResult:
-    is_match: bool
-    reason: str
+class LanguageResponse(BaseModel):
+    language: Literal['english', 'danish', 'unknown']
+
+
+class MatchResult(BaseModel):
+    is_match: bool = False
+    reason: str = ''
 
 
 LANGUAGE_PROMPT = """You are a language classifier for job postings.
@@ -93,8 +97,8 @@ Description:
 {job.description[:3000]}""",
         )
         try:
-            return Language(result.get('language', 'unknown'))
-        except ValueError:
+            return Language(LanguageResponse.model_validate(result).language)
+        except (ValidationError, ValueError):
             return Language.UNKNOWN
 
     def match_criteria(self, job: JobPosting, criteria: str) -> MatchResult:
@@ -110,7 +114,7 @@ Description:
 User's search criteria:
 {criteria}""",
         )
-        return MatchResult(
-            is_match=bool(result.get('is_match', False)),
-            reason=result.get('reason', '') or '',
-        )
+        try:
+            return MatchResult.model_validate(result)
+        except ValidationError:
+            return MatchResult()
