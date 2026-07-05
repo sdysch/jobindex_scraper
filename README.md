@@ -1,5 +1,11 @@
 # jobindex-scraper
 
+[![CI](https://github.com/sdysch/jobindex_scraper/actions/workflows/ci.yml/badge.svg)](https://github.com/sdysch/jobindex_scraper/actions/workflows/ci.yml)
+[![Scrape](https://github.com/sdysch/jobindex_scraper/actions/workflows/scrape.yml/badge.svg)](https://github.com/sdysch/jobindex_scraper/actions/workflows/scrape.yml)
+[![Classify](https://github.com/sdysch/jobindex_scraper/actions/workflows/classify.yml/badge.svg)](https://github.com/sdysch/jobindex_scraper/actions/workflows/classify.yml)
+[![Notify](https://github.com/sdysch/jobindex_scraper/actions/workflows/notify.yml/badge.svg)](https://github.com/sdysch/jobindex_scraper/actions/workflows/notify.yml)
+![Last scrape](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/sdysch/jobindex_scraper/main/last_scrape.json)
+
 Scrape job listings from [Jobindex.dk](https://www.jobindex.dk) in three phases:
 
 1. **Scrape** — fetch raw job postings into Supabase (run every hour)

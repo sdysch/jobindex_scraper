@@ -5,6 +5,9 @@ on:
     - cron: '*/30 * * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
@@ -18,3 +21,11 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           SEARCH_URLS: ${{ secrets.SEARCH_URLS }}
+      - name: Update last scrape timestamp
+        run: |
+          echo "{\"schemaVersion\":1,\"label\":\"last scrape\",\"message\":\"$(TZ=UTC date '+%Y-%m-%d %H:%M UTC')\"}" > last_scrape.json
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add last_scrape.json
+          git diff --staged --quiet || git commit -m "Update last scrape timestamp [skip ci]"
+          git push
