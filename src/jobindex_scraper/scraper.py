@@ -1,12 +1,11 @@
 import json
 import re
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 import httpx
 from bs4 import BeautifulSoup
-
 
 STASH_PATTERN = re.compile(r'var Stash = ({.*?});', re.DOTALL)
 
@@ -19,10 +18,8 @@ class JobPosting:
     company: str
     location: str
     description: str
-    posted_at: Optional[str] = None
-    scraped_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    posted_at: str | None = None
+    scraped_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 
 HEADERS = {
@@ -56,8 +53,7 @@ class JobIndexScraper:
 
         stash: dict[str, Any] = json.loads(match.group(1))
         results: list[dict] = (
-            stash
-            .get('jobsearch/result_app', {})
+            stash.get('jobsearch/result_app', {})
             .get('storeData', {})
             .get('searchResponse', {})
             .get('results', [])
@@ -71,9 +67,7 @@ class JobIndexScraper:
 
         share_url = data.get('share_url', '')
         job_url = (
-            share_url
-            if share_url.startswith('http')
-            else f'{self.BASE_URL}{share_url}'
+            share_url if share_url.startswith('http') else f'{self.BASE_URL}{share_url}'
         )
 
         title = data.get('headline') or ''
@@ -108,7 +102,7 @@ class JobIndexScraper:
             return ''
 
         lines = body.get_text(strip=True, separator='\n').split('\n')
-        meaningful = [l.strip() for l in lines if len(l.strip()) > 40]
+        meaningful = [line.strip() for line in lines if len(line.strip()) > 40]
         return '\n'.join(meaningful)
 
     @staticmethod

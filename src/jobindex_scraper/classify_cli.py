@@ -1,9 +1,9 @@
 import logging
 import sys
 
+from jobindex_scraper.classifier import LLMClassifier
 from jobindex_scraper.config import Config
 from jobindex_scraper.database import Database
-from jobindex_scraper.classifier import LLMClassifier
 from jobindex_scraper.scraper import JobPosting
 
 logging.basicConfig(

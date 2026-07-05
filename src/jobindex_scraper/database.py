@@ -1,7 +1,6 @@
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
-from supabase import create_client, Client
+from supabase import Client, create_client
 
 from jobindex_scraper.scraper import JobPosting
 
@@ -21,7 +20,7 @@ class Database:
         return len(result.data) > 0
 
     def insert_job(self, job: JobPosting, search_url: str) -> dict:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         data = {
             'external_id': job.external_id,
             'url': job.url,
@@ -35,18 +34,12 @@ class Database:
         }
 
         result = (
-            self.client.table('jobs')
-            .upsert(data, on_conflict='external_id')
-            .execute()
+            self.client.table('jobs').upsert(data, on_conflict='external_id').execute()
         )
         return result.data[0] if result.data else {}
 
     def get_unclassified_jobs(self) -> list[dict]:
-        match_rows = (
-            self.client.table('matches')
-            .select('job_id')
-            .execute()
-        )
+        match_rows = self.client.table('matches').select('job_id').execute()
         classified_ids = [r['job_id'] for r in match_rows.data]
 
         query = self.client.table('jobs').select('*').order('scraped_at', desc=True)
@@ -71,11 +64,7 @@ class Database:
             'criteria_used': criteria,
         }
 
-        result = (
-            self.client.table('matches')
-            .insert(data)
-            .execute()
-        )
+        result = self.client.table('matches').insert(data).execute()
         return result.data[0] if result.data else {}
 
     def get_unnotified_matches(self) -> list[dict]:
@@ -90,8 +79,7 @@ class Database:
         return result.data
 
     def mark_matches_notified(self, match_ids: list[int]) -> None:
-        now = datetime.now(timezone.utc).isoformat()
-        self.client.table('matches') \
-            .update({'notified': True, 'notified_at': now}) \
-            .in_('id', match_ids) \
-            .execute()
+        now = datetime.now(UTC).isoformat()
+        self.client.table('matches').update({'notified': True, 'notified_at': now}).in_(
+            'id', match_ids
+        ).execute()

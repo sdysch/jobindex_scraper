@@ -2,8 +2,8 @@ import logging
 import sys
 
 from jobindex_scraper.config import Config
-from jobindex_scraper.scraper import JobIndexScraper
 from jobindex_scraper.database import Database
+from jobindex_scraper.scraper import JobIndexScraper
 
 logging.basicConfig(
     level=logging.INFO,

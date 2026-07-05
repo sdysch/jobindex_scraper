@@ -23,7 +23,11 @@ class TelegramNotifier:
         if not matches:
             return
 
-        lang_emoji = {'english': '\U0001f1ec\U0001f1e7', 'danish': '\U0001f1e9\U0001f1f0', 'unknown': '\u2753'}
+        lang_emoji = {
+            'english': '\U0001f1ec\U0001f1e7',
+            'danish': '\U0001f1e9\U0001f1f0',
+            'unknown': '\u2753',
+        }
 
         parts = ['\U0001f514 <b>New Job Matches</b>\n']
         for i, m in enumerate(matches, 1):
@@ -31,8 +35,10 @@ class TelegramNotifier:
             emoji = lang_emoji.get(lang, '\u2753')
             parts.append(
                 f'{i}. <a href="{m["url"]}">{m["title"]}</a>\n'
-                f'\U0001f3e2 {m.get("company", "?")}  \U0001f4cd {m.get("location", "?")}\n'
-                f'{emoji} {lang.capitalize()}  \u2705 {m.get("match_reason", "")}\n'
+                f'\U0001f3e2 {m.get("company", "?")}  '
+                f'\U0001f4cd {m.get("location", "?")}\n'
+                f'{emoji} {lang.capitalize()}  '
+                f'\u2705 {m.get("match_reason", "")}\n'
             )
 
         text = '\n'.join(parts)

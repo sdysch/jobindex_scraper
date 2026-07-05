@@ -22,15 +22,15 @@ class MatchResult:
     reason: str
 
 
-LANGUAGE_PROMPT = '''You are a language classifier for job postings.
+LANGUAGE_PROMPT = """You are a language classifier for job postings.
 Determine whether the posting is written in English or Danish.
 
-Respond with JSON: {"language": "english" | "danish" | "unknown"}'''
+Respond with JSON: {"language": "english" | "danish" | "unknown"}"""
 
-MATCH_PROMPT = '''You are a job matching classifier. Determine whether the
+MATCH_PROMPT = """You are a job matching classifier. Determine whether the
 job posting matches the user's search criteria.
 
-Respond with JSON: {"is_match": true | false, "reason": "..."}'''
+Respond with JSON: {"is_match": true | false, "reason": "..."}"""
 
 
 def _parse_json(content: str) -> dict:
@@ -71,7 +71,7 @@ class LLMClassifier:
             )
 
             if response.status_code == 429:
-                wait = 2 ** attempt
+                wait = 2**attempt
                 time.sleep(wait)
                 continue
 
@@ -85,12 +85,12 @@ class LLMClassifier:
     def classify_language(self, job: JobPosting) -> Language:
         result = self._call(
             LANGUAGE_PROMPT,
-            f'''Job posting:
+            f"""Job posting:
 Title: {job.title}
 Company: {job.company}
 Location: {job.location}
 Description:
-{job.description[:3000]}''',
+{job.description[:3000]}""",
         )
         try:
             return Language(result.get('language', 'unknown'))
@@ -100,7 +100,7 @@ Description:
     def match_criteria(self, job: JobPosting, criteria: str) -> MatchResult:
         result = self._call(
             MATCH_PROMPT,
-            f'''Job posting:
+            f"""Job posting:
 Title: {job.title}
 Company: {job.company}
 Location: {job.location}
@@ -108,7 +108,7 @@ Description:
 {job.description[:3000]}
 
 User's search criteria:
-{criteria}''',
+{criteria}""",
         )
         return MatchResult(
             is_match=bool(result.get('is_match', False)),

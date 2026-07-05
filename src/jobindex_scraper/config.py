@@ -3,10 +3,8 @@ import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 import dotenv
-
 
 GITHUB_MODELS_URL = 'https://models.inference.ai.azure.com'
 
@@ -29,7 +27,7 @@ class Config:
     search_urls: list[str] = field(default_factory=list)
 
     @classmethod
-    def from_env(cls, env_path: Optional[Path] = None) -> 'Config':
+    def from_env(cls, env_path: Path | None = None) -> 'Config':
         env_file = env_path or Path('.env')
         dotenv.load_dotenv(dotenv_path=env_file)
 
@@ -65,9 +63,9 @@ class Config:
             for i, line in enumerate(lines):
                 stripped = line.strip()
                 if stripped.startswith(prefix):
-                    parts = [stripped[len(prefix):]]
+                    parts = [stripped[len(prefix) :]]
                     depth = parts[0].count('[') - parts[0].count(']')
-                    for next_line in lines[i + 1:]:
+                    for next_line in lines[i + 1 :]:
                         parts.append(next_line)
                         depth += next_line.count('[') - next_line.count(']')
                         if depth <= 0:
@@ -79,6 +77,5 @@ class Config:
                     return json.loads(raw)
 
         return []
-
 
     # ... rest of config
