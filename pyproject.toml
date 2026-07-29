@@ -10,12 +10,14 @@ dependencies = [
     "supabase>=2",
     "python-dotenv>=1",
     "pydantic>=2",
+    "pyyaml>=6",
 ]
 
 [project.scripts]
 jobindex-scrape = "jobindex_scraper.scrape_cli:main"
 jobindex-classify = "jobindex_scraper.classify_cli:main"
 jobindex-message = "jobindex_scraper.message_cli:main"
+jobindex-salary-scrape = "jobindex_scraper.salary_scraper:main"
 
 [tool.uv]
 package = true

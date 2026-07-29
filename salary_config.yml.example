@@ -1,0 +1,15 @@
+api_key: 'ABCDEFG123456'
+api_path: '/api/salaryindex/v2/salarylevel'
+output_path: 'salary_results.json'
+
+# Optional: browser cookies for an authenticated session
+# cookies:
+#   jix-session: 'your-session-cookie'
+
+geoarea_ids:
+  - 123456
+
+education_levels:
+  - 123456
+
+delay: 1.5

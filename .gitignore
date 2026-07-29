@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 .venv/
 .env
+
+salary_config.yml
+jobs_slug.txt
+salary_results.json
